@@ -1,6 +1,8 @@
 #define CLOCKWISE           1
 #define COUNTER_CLOCKWISE   0
 
+#define MOTOR_QUANTITY      1
+
 #include "pico/stdlib.h"
 #include <math.h>
 
@@ -15,6 +17,8 @@ typedef struct StepperMotor_t{
     unsigned int decaySetting;  //Decay setting value in [%]
     unsigned int revSteps;      //Steps by full rotary shaft revolution. (e.g. 200)
     double  nVoltage;           //Nominal power supply voltage [V]
+    double speed_rad;           //Stepper motor rotation speed [rad/s]
+    double speed_m;             //Stepper motor rotation speed [m/s]
 }StepperMotor_t;
 
 /**
