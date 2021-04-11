@@ -10,7 +10,7 @@ int main(void)
 {
     StepperMotor_t motor1;
     
-    init_motor(&motor1, 11, 12, 13, 1.5, 8, 50);
+    InitMotor(&motor1, 11, 12, 13, 1.5, 12, 200, 8, 50);
 
     const uint LED_PIN = 25;
 
@@ -21,7 +21,7 @@ int main(void)
 
     while(true)
     {
-        make_step(1, motor1);
-        sleep_us(50);
+        RotateMotor_angleDeg(&motor1, 45, CLOCKWISE);
+        sleep_ms(1000);
     }
 }
