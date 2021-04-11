@@ -1,4 +1,8 @@
+#define CLOCKWISE           1
+#define COUNTER_CLOCKWISE   0
+
 #include "pico/stdlib.h"
+#include <math.h>
 
 typedef struct StepperMotor_t{
     uint stepPin;               //Clock pin
@@ -34,7 +38,7 @@ void MakeStep(bool dir, StepperMotor_t motor);
  * @param microstep_        Microstep setting set on stepper motor driver.
  * @param decaySetting_     Decay setting on stepper motor driver (if possible).
  */
-void Init_motor(StepperMotor_t *motor, uint stepPin_, uint dirPin_, uint enPin_,
+void InitMotor(StepperMotor_t *motor, uint stepPin_, uint dirPin_, uint enPin_,
                 double current_, double nVoltage_, unsigned int revSteps_, 
                 unsigned int microstep_, unsigned int decaySetting_);
 
@@ -69,12 +73,16 @@ void RotateMotor_steps(StepperMotor_t *motor, double steps, bool dir);
  * Get steps count from given angle in degrees.
  * 
  * @param angleDeg      Rotation angle in radians.
+ * 
+ * @return              Amount of steps.
  */
-unsigned int GetStepsFromAngleDeg(double angleDeg);
+unsigned int GetStepsFromAngleDeg(double angleDeg,  unsigned int revSteps, unsigned int microstep);
 
 /**
  * Get steps count from given angle in radians.
  * 
  * @param angleRad      Rotation angle in degrees. 
+ * 
+ * @return              Amount of steps.
  */
-unsigned int GetStepsFromAngleRad(double angleRad);
+unsigned int GetStepsFromAngleRad(double angleRad,  unsigned int revSteps, unsigned int microstep);
