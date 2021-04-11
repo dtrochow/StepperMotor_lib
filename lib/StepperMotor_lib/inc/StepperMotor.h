@@ -73,6 +73,8 @@ void RotateMotor_steps(StepperMotor_t *motor, double steps, bool dir);
  * Get steps count from given angle in degrees.
  * 
  * @param angleDeg      Rotation angle in radians.
+ * @param revSteps      Full revolution steps count.
+ * @param microstep     Microstep setting set on stepper motor driver.
  * 
  * @return              Amount of steps.
  */
@@ -82,6 +84,8 @@ unsigned int GetStepsFromAngleDeg(double angleDeg,  unsigned int revSteps, unsig
  * Get steps count from given angle in radians.
  * 
  * @param angleRad      Rotation angle in degrees. 
+ * @param revSteps      Full revolution steps count.
+ * @param microstep     Microstep setting set on stepper motor driver.
  * 
  * @return              Amount of steps.
  */
