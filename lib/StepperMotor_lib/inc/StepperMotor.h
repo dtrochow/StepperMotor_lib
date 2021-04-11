@@ -19,7 +19,7 @@ typedef struct StepperMotor_t{
  * @param dir       Rotation direction. 1 - clockwise, 0 - counter clockwise.
  * @param motor     Stepper motor structure with all motor parameters.
  */
-void make_step(bool dir, StepperMotor_t motor);
+void MakeStep(bool dir, StepperMotor_t motor);
 
 /**
  * Motor initialization.
@@ -34,8 +34,47 @@ void make_step(bool dir, StepperMotor_t motor);
  * @param microstep_        Microstep setting set on stepper motor driver.
  * @param decaySetting_     Decay setting on stepper motor driver (if possible).
  */
-void init_motor(StepperMotor_t *motor, uint stepPin_, uint dirPin_, uint enPin_,
+void Init_motor(StepperMotor_t *motor, uint stepPin_, uint dirPin_, uint enPin_,
                 double current_, double nVoltage_, unsigned int revSteps_, 
                 unsigned int microstep_, unsigned int decaySetting_);
 
-//void rotate_motor(StepperMotor_t *motor, double angle, )
+/**
+ * Rotete stepper motor by given angle in degrees.
+ * 
+ * @param motor         Pointer to stepper motor structure with all motor parameters. 
+ * @param angleDeg      Rotation angle in degrees. 
+ * @param dir           Rotation direction.
+ */
+void RotateMotor_angleDeg(StepperMotor_t *motor, double angleDeg, bool dir);
+
+/**
+ * Rotate stepper motor by given angle in radians.
+ * 
+ * @param motor         Pointer to stepper motor structure with all motor parameters. 
+ * @param angleRad      Rotation angle in radians.
+ * @param dir           Rotation direction.
+ */
+void RotateMotor_angleRad(StepperMotor_t *motor, double angleRad, bool dir);
+
+/**
+ * Rotate stepper motor by given steps count.
+ * 
+ * @param motor         Pointer to stepper motor structure with all motor parameters. 
+ * @param steps         Amount of steps rotate by motor.
+ * @param dir           Rotation direction.
+ */
+void RotateMotor_steps(StepperMotor_t *motor, double steps, bool dir);
+
+/**
+ * Get steps count from given angle in degrees.
+ * 
+ * @param angleDeg      Rotation angle in radians.
+ */
+unsigned int GetStepsFromAngleDeg(double angleDeg);
+
+/**
+ * Get steps count from given angle in radians.
+ * 
+ * @param angleRad      Rotation angle in degrees. 
+ */
+unsigned int GetStepsFromAngleRad(double angleRad);
