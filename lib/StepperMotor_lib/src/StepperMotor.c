@@ -17,7 +17,9 @@ void make_step(bool dir, StepperMotor_t motor)
  * Motor initialization.
  * @TODO Describe what this inicializzation doing.
  */
-void init_motor(StepperMotor_t *motor, uint stepPin_, uint dirPin_, uint enPin_, float current_, unsigned int microstep_, unsigned int decaySetting_)
+void init_motor(StepperMotor_t *motor, uint stepPin_, uint dirPin_, uint enPin_,
+                double current_, double nVoltage_, unsigned int revSteps_, 
+                unsigned int microstep_, unsigned int decaySetting_)
 {
     motor->stepPin = stepPin_;
     motor->dirPin = dirPin_;
@@ -25,6 +27,8 @@ void init_motor(StepperMotor_t *motor, uint stepPin_, uint dirPin_, uint enPin_,
     motor->current = current_;
     motor->microstep = microstep_;
     motor->decaySetting = decaySetting_;
+    motor->nVoltage = nVoltage_;
+    motor->revSteps = revSteps_;
 
     gpio_init(motor->stepPin);
     gpio_init(motor->dirPin);
