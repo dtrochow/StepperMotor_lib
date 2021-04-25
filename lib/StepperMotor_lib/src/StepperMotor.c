@@ -1,5 +1,7 @@
 #include "inc/StepperMotor.h"
 
+
+
 /**
  * Make one step in chosen direction.
  * It is made by setting low state on CLK driver pin. 

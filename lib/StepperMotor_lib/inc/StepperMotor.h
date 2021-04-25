@@ -6,6 +6,8 @@
 #include "pico/stdlib.h"
 #include <math.h>
 
+
+
 typedef struct StepperMotor_t{
     uint stepPin;               //Clock pin
     uint dirPin;                //Rotation direcion pin  
