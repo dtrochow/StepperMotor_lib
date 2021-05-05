@@ -1,6 +1,6 @@
 #include "inc/StepperMotor.h"
 
-
+absolute_time_t abs_time;
 
 /**
  * Make one step in chosen direction.
@@ -21,7 +21,7 @@ void MakeStep(bool dir, StepperMotor_t motor)
  */
 void InitMotor(StepperMotor_t *motor, uint stepPin_, uint dirPin_, uint enPin_,
                 double current_, double nVoltage_, unsigned int revSteps_, 
-                unsigned int microstep_, unsigned int decaySetting_)
+                unsigned int microstep_, unsigned int decaySetting_, double nTorque_)
 {
     motor->stepPin = stepPin_;
     motor->dirPin = dirPin_;
@@ -32,7 +32,15 @@ void InitMotor(StepperMotor_t *motor, uint stepPin_, uint dirPin_, uint enPin_,
     motor->nVoltage = nVoltage_;
     motor->revSteps = revSteps_;
     motor->speed_rad = 0;   //Set initial motor speed to 0 rad/s
-    motor->speed_m = 0;     //Set initial motor speed to 0 m/s
+    motor->speed_deg = 0;   //Set initial motor speed to 0 deg/s
+    motor->degPerStep = 360.0/(motor->revSteps * motor->gearRatio * motor->microstep);
+    motor->stepPerDeg = 1/motor->degPerStep;
+    motor->radPerStep = (2*M_PI)/(motor->revSteps * motor->gearRatio * motor->microstep);
+    motor->stepPerRad = 1/motor->stepPerRad;
+    motor->posJoint_deg = 0;
+    motor->posJoint_rad = 0;
+    motor->posMotor_deg = 0;
+    motor->posMotor_rad = 0;
 
     //Initialize stepper motor controler outputs
     gpio_init(motor->stepPin);                  //Initialize gpio
@@ -100,3 +108,22 @@ unsigned int GetStepsFromAngleRad(double angleRad,  unsigned int revSteps, unsig
     return ((angleRad / (2 * M_PI)) * revSteps * microstep);
 }
 
+/**
+ * Set stepper motor angular velocity [deg/s].
+ */
+void SetMotorSpeedDeg(StepperMotor_t *motor, double speed)
+{
+    motor->speed_deg = speed;
+    motor->speed_rad = (speed / 360) * (2*M_PI);
+    motor->deltaT = (motor->degPerStep / motor->speed_deg) * 1000000;
+}
+
+/**
+ * Set stepper motor angular velocity [rad/s].
+ */
+void SetMotorSpeedRad(StepperMotor_t *motor, double speed)
+{
+    motor->speed_rad = speed;
+    motor->speed_deg = (speed / 2*M_PI) * 360;
+    motor->deltaT = (motor->radPerStep / motor->speed_rad) * 1000000;
+}
