@@ -2,6 +2,9 @@
 
 absolute_time_t abs_time;
 
+StepperMotor_t *stepperMotors[MAX_MOTOR_QUANTITY];
+int motorsQuantity = 0;
+
 /**
  * Make one step in chosen direction.
  * It is made by setting low state on CLK driver pin. 
@@ -21,7 +24,8 @@ void MakeStep(bool dir, StepperMotor_t motor)
  */
 void InitMotor(StepperMotor_t *motor, uint stepPin_, uint dirPin_, uint enPin_,
                 double current_, double nVoltage_, unsigned int revSteps_, 
-                unsigned int microstep_, unsigned int decaySetting_, double nTorque_)
+                unsigned int microstep_, unsigned int decaySetting_, double nTorque_,
+                float gearRatio_)
 {
     motor->stepPin = stepPin_;
     motor->dirPin = dirPin_;
@@ -30,13 +34,15 @@ void InitMotor(StepperMotor_t *motor, uint stepPin_, uint dirPin_, uint enPin_,
     motor->microstep = microstep_;
     motor->decaySetting = decaySetting_;
     motor->nVoltage = nVoltage_;
+    motor->nTorque = nTorque_;
+    motor->gearRatio = gearRatio_;
     motor->revSteps = revSteps_;
     motor->speed_rad = 0;   //Set initial motor speed to 0 rad/s
     motor->speed_deg = 0;   //Set initial motor speed to 0 deg/s
     motor->degPerStep = 360.0/(motor->revSteps * motor->gearRatio * motor->microstep);
     motor->stepPerDeg = 1/motor->degPerStep;
     motor->radPerStep = (2*M_PI)/(motor->revSteps * motor->gearRatio * motor->microstep);
-    motor->stepPerRad = 1/motor->stepPerRad;
+    motor->stepPerRad = 1/motor->radPerStep;
     motor->posJoint_deg = 0;
     motor->posJoint_rad = 0;
     motor->posMotor_deg = 0;
@@ -52,6 +58,11 @@ void InitMotor(StepperMotor_t *motor, uint stepPin_, uint dirPin_, uint enPin_,
     gpio_put(motor->stepPin, 0);                //Set initial value to low
     gpio_put(motor->dirPin, 0);
     gpio_put(motor->enPin, 0);
+
+    SetMotorSpeedRad(motor, motor->speed_rad);
+
+    stepperMotors[motorsQuantity] = motor;
+    motorsQuantity ++;
 }
 
 /**

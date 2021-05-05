@@ -21,7 +21,7 @@ int main(void)
 {
     StepperMotor_t motor1;
     
-    InitMotor(&motor1, 11, 12, 13, 1.5, 12, 200, 2, 50, 0.2);
+    InitMotor(&motor1, 11, 12, 13, 1.5, 12, 200, 2, 50, 0.2, 2);
 
     // multicore_launch_core1(core1_entry);
 

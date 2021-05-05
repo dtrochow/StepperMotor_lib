@@ -2,6 +2,7 @@
 #define COUNTER_CLOCKWISE   0
 
 #define MOTOR_QUANTITY      1
+#define MAX_MOTOR_QUANTITY  10
 
 #include "pico/stdlib.h"
 #include <math.h>
@@ -57,7 +58,8 @@ void MakeStep(bool dir, StepperMotor_t motor);
  */
 void InitMotor(StepperMotor_t *motor, uint stepPin_, uint dirPin_, uint enPin_,
                 double current_, double nVoltage_, unsigned int revSteps_, 
-                unsigned int microstep_, unsigned int decaySetting_, double nTorque_);
+                unsigned int microstep_, unsigned int decaySetting_, double nTorque_,
+                float gearRatio_);
 
 /**
  * Rotete stepper motor by given angle in degrees.
