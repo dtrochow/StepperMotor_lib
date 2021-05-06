@@ -1,6 +1,7 @@
 #include "inc/StepperMotor.h"
 
-absolute_time_t abs_time;
+//absolute_time_t abs_time;
+uint64_t abs_time;
 
 StepperMotor_t *stepperMotors[MAX_MOTOR_QUANTITY];
 int motorsQuantity = 0;
@@ -10,12 +11,12 @@ int motorsQuantity = 0;
  * It is made by setting low state on CLK driver pin. 
  * @TODO Describe how to set STEP on stepper motor driver (include description to differ drivers)
  */
-void MakeStep(bool dir, StepperMotor_t motor)
+void MakeStep(bool dir, StepperMotor_t *motor)
 {
-    gpio_put(motor.dirPin, dir);
-    gpio_put(motor.stepPin, 0);
+    gpio_put(motor->dirPin, dir);
+    gpio_put(motor->stepPin, 0);
     sleep_us(3);
-    gpio_put(motor.stepPin, 1);
+    gpio_put(motor->stepPin, 1);
 }
 
 /**
@@ -37,7 +38,7 @@ void InitMotor(StepperMotor_t *motor, uint stepPin_, uint dirPin_, uint enPin_,
     motor->nTorque = nTorque_;
     motor->gearRatio = gearRatio_;
     motor->revSteps = revSteps_;
-    motor->speed_rad = 0;   //Set initial motor speed to 0 rad/s
+    motor->speed_rad = 0.1;   //Set initial motor speed to 0 rad/s
     motor->speed_deg = 0;   //Set initial motor speed to 0 deg/s
     motor->degPerStep = 360.0/(motor->revSteps * motor->gearRatio * motor->microstep);
     motor->stepPerDeg = 1/motor->degPerStep;
@@ -47,6 +48,8 @@ void InitMotor(StepperMotor_t *motor, uint stepPin_, uint dirPin_, uint enPin_,
     motor->posJoint_rad = 0;
     motor->posMotor_deg = 0;
     motor->posMotor_rad = 0;
+    motor->stepTime = 0;
+    motor->rotationMode = MOVE_WITH_SET_SPEED;
 
     //Initialize stepper motor controler outputs
     gpio_init(motor->stepPin);                  //Initialize gpio
@@ -61,7 +64,7 @@ void InitMotor(StepperMotor_t *motor, uint stepPin_, uint dirPin_, uint enPin_,
 
     SetMotorSpeedRad(motor, motor->speed_rad);
 
-    stepperMotors[motorsQuantity] = motor;
+    stepperMotors[motorsQuantity] = motor; //Add motor pointer to motors array
     motorsQuantity ++;
 }
 
@@ -73,7 +76,7 @@ void RotateMotor_angleDeg(StepperMotor_t *motor, double angleDeg, bool dir)
     unsigned int steps = GetStepsFromAngleDeg(angleDeg, motor->revSteps, motor->microstep);
     for(int i = 0; i < steps; i++)
     {
-        MakeStep(dir, *motor);
+        MakeStep(dir, motor);
         sleep_us(500);
     }
 }
@@ -86,7 +89,7 @@ void RotateMotor_angleRad(StepperMotor_t *motor, double angleRad, bool dir)
     unsigned int steps = GetStepsFromAngleRad(angleRad, motor->revSteps, motor->microstep);
     for(int i = 0; i < steps; i++)
     {
-        MakeStep(dir, *motor);
+        MakeStep(dir, motor);
         sleep_us(500);
     }
 }
@@ -98,7 +101,7 @@ void RotateMotor_steps(StepperMotor_t *motor, double steps, bool dir)
 {
     for(int i = 0; i < steps; i ++)
     {
-        MakeStep(dir, *motor);
+        MakeStep(dir, motor);
         sleep_us(500);
     }
 }
@@ -137,4 +140,57 @@ void SetMotorSpeedRad(StepperMotor_t *motor, double speed)
     motor->speed_rad = speed;
     motor->speed_deg = (speed / 2*M_PI) * 360;
     motor->deltaT = (motor->radPerStep / motor->speed_rad) * 1000000;
+}
+
+/**
+ * 
+ * 
+ */
+void ControlLoop()
+{
+    for(int i = 0; i < motorsQuantity; i++)
+    {   
+        abs_time = time_us_64();
+        switch(stepperMotors[i]->rotationMode)
+        {
+            case MOVE_BY_ANGLE:
+            // Check the error (setAngle - actualAngle)
+
+            break;
+
+            case MOVE_WITH_SET_SPEED:
+            // Do not check the error and continously rotate the shaft.
+                if((abs_time - stepperMotors[i]->stepTime) >= stepperMotors[i]->deltaT)
+                {
+                    MakeStep(CLOCKWISE, stepperMotors[i]);
+                    stepperMotors[i]->stepTime = abs_time;
+                    //Need to update current angle
+                }
+            break;
+
+            case MOVE_WITH_SET_SPEED_FOR_TIME:
+            // Rotate motor shaft by given time in some variable in stepperMotor structure.
+
+            break;
+
+            case DISABLED:
+            // Do not move the motor shaft, keep torque on shaft.
+                
+            break;
+
+            case DISABLED_NO_TORQUE:
+            // Do not move the motor shaft, do not keep torque on shaft.
+
+            break;
+        }
+    }
+}
+
+/**
+ * 
+ * 
+ */
+void UpdatePosAfterStep(StepperMotor_t *motor)
+{
+    
 }

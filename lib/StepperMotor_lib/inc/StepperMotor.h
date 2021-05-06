@@ -8,6 +8,15 @@
 #include <math.h>
 #include "pico/types.h"
 
+typedef enum {
+    MOVE_BY_ANGLE,                  //Move motor shaft by given angle with set velocity.
+    MOVE_WITH_SET_SPEED,            //Move motor shaft continously with set velocity.
+    MOVE_WITH_SET_SPEED_FOR_TIME,   //Move motor shaft for given time with set velocity.
+    DISABLED,                       //Motor disabled, with torque on the shaft.
+    ENABLED,                        //Motor enabled, with torque on the shaft.
+    DISABLED_NO_TORQUE              //Motor disabled without the torque on the shaft.  
+} Mode;
+
 typedef struct StepperMotor_t{
     uint stepPin;               //Clock pin.
     uint dirPin;                //Rotation direcion pin.
@@ -32,6 +41,8 @@ typedef struct StepperMotor_t{
     double radPerStep;          //Joint rotation angle make by one step. [radians]
     double stepPerRad;          //Count of steps needed to make one radian joint rotation.
     double deltaT;              //Count of microseconds between steps (depends on motor speed).
+    uint64_t stepTime;          //Variable used to make steps with given speed.
+    Mode rotationMode;                  //Mode of stepper motor rotation.
 }StepperMotor_t;
 
 /**
@@ -40,7 +51,7 @@ typedef struct StepperMotor_t{
  * @param dir       Rotation direction. 1 - clockwise, 0 - counter clockwise.
  * @param motor     Stepper motor structure with all motor parameters.
  */
-void MakeStep(bool dir, StepperMotor_t motor);
+void MakeStep(bool dir, StepperMotor_t *motor);
 
 /**
  * Motor initialization.
@@ -125,3 +136,17 @@ void SetMotorSpeedDeg(StepperMotor_t *motor, double speed);
  * @param speed     Stepper motor angular velocity. [rad/s]
  */
 void SetMotorSpeedRad(StepperMotor_t *motor, double speed);
+
+/**
+ * 
+ * 
+ */
+void ControlLoop();
+
+
+/**
+ * 
+ * 
+ * 
+ */
+void UpdatePosAfterStep();
