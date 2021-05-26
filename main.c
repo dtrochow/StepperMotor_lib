@@ -24,22 +24,24 @@ int main(void)
 {
     StepperMotor_t motor1;
     
-    InitMotor(&motor1, 11, 12, 13, 1.5, 12, 200, 2, 50, 0.2, 20);
+    InitMotor(&motor1, 11, 12, 13, 1.5, 12, 200, 2, 50, 0.2, 10);
+
     SetMotorSpeedDeg(&motor1, 90);
 
-    // multicore_launch_core1(core1_entry);
+    motor1.setValue.deg = 80;
 
     int revolution = 0;
 
     //SetMotorSpeedDeg(&motor1, 10);
     multicore_launch_core1(core1_entry);
 
+    double speed = 2.5;
+    bool direction = 1;
+
+
     while(true)
     {
-        // RotateMotor_angleDeg(&motor1, 360, CLOCKWISE);
-        // revolution ++;
-        // printf("Revolution %d ;-)\n", revolution);
-        // sleep_ms(1000);
+
     }
 }
  

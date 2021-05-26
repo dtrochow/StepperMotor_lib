@@ -1,8 +1,4 @@
-#define CLOCKWISE           1
-#define COUNTER_CLOCKWISE   0
-
-#define MOTOR_QUANTITY      1
-#define MAX_MOTOR_QUANTITY  10
+#define MAX_MOTOR_QUANTITY  8
 
 #include "pico/stdlib.h"
 #include <math.h>
@@ -10,12 +6,35 @@
 
 typedef enum {
     MOVE_BY_ANGLE,                  //Move motor shaft by given angle with set velocity.
-    MOVE_WITH_SET_SPEED,            //Move motor shaft continously with set velocity.
-    MOVE_WITH_SET_SPEED_FOR_TIME,   //Move motor shaft for given time with set velocity.
+    MOVE_CONTINOUSLY,               //Move motor shaft continously with set velocity.
+    MOVE_FOR_TIME,                  //Move motor shaft for given time with set velocity.
+    MOVE_TO_SET_VALUE,              //Move motor shaft to set value.
     DISABLED,                       //Motor disabled, with torque on the shaft.
     ENABLED,                        //Motor enabled, with torque on the shaft.
     DISABLED_NO_TORQUE              //Motor disabled without the torque on the shaft.  
-} Mode;
+} Mode_e;
+
+typedef enum {
+    COUNTER_CLOCKWISE,
+    CLOCKWISE                     
+} RotationDir_e;
+
+typedef struct {
+    double shaftDeg;        //Motor shaft angle position. [degrees] 
+    double shaftRad;        //Motor shaft angle position. [radians]
+    double jointDeg;        //Position of joint driven by motor. [degrees]
+    double jointRad;        //Position of joint driven by motor. [radians]
+} AngularPosition_t;
+
+typedef struct {
+    double rad;             //Speed of joint driven by motor. [rad/s]
+    double deg;             //Speed of joint driven by motor. [deg/s]
+} RotationSpeed_t;
+
+typedef struct {
+    double deg;             //Set value of shaft angular position.
+    double rad;
+} AngleSetValue_t;
 
 typedef struct StepperMotor_t{
     uint stepPin;               //Clock pin.
@@ -30,28 +49,25 @@ typedef struct StepperMotor_t{
     unsigned int revSteps;      //Steps by full rotary shaft revolution. (e.g. 200)
     double nVoltage;            //Nominal power supply voltage. [V]
     double nTorque;             //Nominal motor torque. [Nm]
-    double speed_rad;           //Speed of joint driven by motor. [rad/s]
-    double speed_deg;           //Speed of joint driven by motor. [deg/s]
-    double posMotor_deg;        //Motor shaft angle position. [degrees] 
-    double posMotor_rad;        //Motor shaft angle position. [radians]
-    double posJoint_deg;        //Position of joint driven by motor. [degrees]
-    double posJoint_rad;        //Position of joint driven by motor. [radians]
+    RotationSpeed_t speed;      //Speed of joint driven by motor.
     double degPerStep;          //Joint rotation angle make by one step. [degrees]
     double stepPerDeg;          //Count of steps needed to make one degree joint rotation.
     double radPerStep;          //Joint rotation angle make by one step. [radians]
     double stepPerRad;          //Count of steps needed to make one radian joint rotation.
     double deltaT;              //Count of microseconds between steps (depends on motor speed).
     uint64_t stepTime;          //Variable used to make steps with given speed.
-    Mode rotationMode;                  //Mode of stepper motor rotation.
-}StepperMotor_t;
+    Mode_e rotationMode;        //Mode of stepper motor rotation.
+    RotationDir_e dir;          //Motor shaft rotate direction.
+    AngularPosition_t position; //Angular positions.
+    volatile AngleSetValue_t setValue;   //Set value of shaft angular position.
+} StepperMotor_t;
 
 /**
  * Make one step in chosen direction.
  * 
- * @param dir       Rotation direction. 1 - clockwise, 0 - counter clockwise.
  * @param motor     Stepper motor structure with all motor parameters.
  */
-void MakeStep(bool dir, StepperMotor_t *motor);
+void MakeStep(StepperMotor_t *motor);
 
 /**
  * Motor initialization.
@@ -79,7 +95,7 @@ void InitMotor(StepperMotor_t *motor, uint stepPin_, uint dirPin_, uint enPin_,
  * @param angleDeg      Rotation angle in degrees. 
  * @param dir           Rotation direction.
  */
-void RotateMotor_angleDeg(StepperMotor_t *motor, double angleDeg, bool dir);
+void RotateMotor_angleDeg(StepperMotor_t *motor, double angleDeg, RotationDir_e dir);
 
 /**
  * Rotate stepper motor by given angle in radians.
@@ -88,7 +104,7 @@ void RotateMotor_angleDeg(StepperMotor_t *motor, double angleDeg, bool dir);
  * @param angleRad      Rotation angle in radians.
  * @param dir           Rotation direction.
  */
-void RotateMotor_angleRad(StepperMotor_t *motor, double angleRad, bool dir);
+void RotateMotor_angleRad(StepperMotor_t *motor, double angleRad, RotationDir_e dir);
 
 /**
  * Rotate stepper motor by given steps count.
@@ -97,7 +113,7 @@ void RotateMotor_angleRad(StepperMotor_t *motor, double angleRad, bool dir);
  * @param steps         Amount of steps rotate by motor.
  * @param dir           Rotation direction.
  */
-void RotateMotor_steps(StepperMotor_t *motor, double steps, bool dir);
+void RotateMotor_steps(StepperMotor_t *motor, double steps, RotationDir_e dir);
 
 /**
  * Get steps count from given angle in degrees.
@@ -138,15 +154,24 @@ void SetMotorSpeedDeg(StepperMotor_t *motor, double speed);
 void SetMotorSpeedRad(StepperMotor_t *motor, double speed);
 
 /**
- * 
- * 
+ * Function controling all defined motors.
+ * IMPORTANT: This function should be put in while loop or intrrupt callback, 
+ *            which is refreshed more often then every 10us(?).
  */
 void ControlLoop();
 
 
 /**
+ * Update motor position, after every step.
  * 
- * 
- * 
+ * @param motor     Pointer to stepper motor structure with all motor parameters. 
  */
-void UpdatePosAfterStep();
+void UpdatePosAfterStep(StepperMotor_t *motor);
+
+/**
+ * Change rotate direction.
+ * 
+ * @param motor         Pointer to stepper motor structure with all motor parameters.  
+ * @param dir           Rotation direction.
+ */
+void ChangeRotateDirection(StepperMotor_t *motor, RotationDir_e dir);
