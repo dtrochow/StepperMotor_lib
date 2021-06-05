@@ -184,11 +184,13 @@ void ControlLoop()
             break;
 
             case MOVE_TO_SET_VALUE:
+                /*
                 double error = stepperMotors[i]->setValue.deg - stepperMotors[i]->position.jointDeg;
                 if((abs_time - stepperMotors[i]->stepTime) >= stepperMotors[i]->deltaT)
                 {
                     
                 }
+                */
 
             break;
 
